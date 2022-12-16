@@ -1,0 +1,10 @@
+.vscode
+.ipynb_checkpoints
+.DS_Store
+__pycache__
+.pyc
+testing.py
+graveyard.py
+cals.ipynb
+models
+msc_plots
