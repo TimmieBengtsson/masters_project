@@ -3,9 +3,9 @@
 .DS_Store
 __pycache__
 .pyc
-testing.py
 graveyard.py
-cals.ipynb
 models
 msc_plots
 .idea
+old_cryptopred.ipynb
+old_pricepred.ipynb
