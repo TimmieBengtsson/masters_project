@@ -21,19 +21,23 @@ def classify(current, future):
 def create_model(train_x):
     model = Sequential()
     model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.25))
     model.add(BatchNormalization())  #normalizes activation outputs, same reason you want to normalize your input data.
 
     model.add(LSTM(128, return_sequences=True))
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.25))
+    model.add(BatchNormalization())
+
+    model.add(LSTM(128, return_sequences=True))
+    model.add(Dropout(0.25))
     model.add(BatchNormalization())
 
     model.add(LSTM(128))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.25))
     model.add(BatchNormalization())
 
     model.add(Dense(32, activation='relu'))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.25))
 
     model.add(Dense(2, activation='softmax'))
 
@@ -55,34 +59,30 @@ def preprocess_df(df, SEQ_LEN):
             
     df.dropna(inplace=True) 
 
-    sequential_data = [] 
+    seq_data = [] 
     prev_days = deque(maxlen=SEQ_LEN) 
     for i in df.values:
         prev_days.append([n for n in i[:-1]]) 
         if len(prev_days) == SEQ_LEN:  
-            sequential_data.append([np.array(prev_days), i[-1]])  
-    random.shuffle(sequential_data)
+            seq_data.append([np.array(prev_days), i[-1]])  
+    random.shuffle(seq_data)
 
-    buys = []  
-    sells = [] 
-    for seq, target in sequential_data:
+    ups, downs = [], []
+    for seq, target in seq_data:
         if target == 0:  # if it's a sell
-            sells.append([seq, target])  
+            downs.append([seq, target])  
         elif target == 1: 
-            buys.append([seq, target])  # it's a buy
-    random.shuffle(buys)  
-    random.shuffle(sells) 
+            ups.append([seq, target])  # it's a buy
+    random.shuffle(ups)  
+    random.shuffle(downs) 
 
-    lower = min(len(buys), len(sells))  # what's the shorter length?
-    buys = buys[:lower]  
-    sells = sells[:lower]
+    lower = min(len(ups), len(downs))  # what's the shorter length?
+    ups, downs = ups[:lower], downs[:lower]
+    seq_data = ups+downs 
+    random.shuffle(seq_data) 
 
-    sequential_data = buys+sells 
-    random.shuffle(sequential_data) 
-
-    X = []
-    y = []
-    for seq, target in sequential_data:  
+    X, y = [], []
+    for seq, target in seq_data:  
         X.append(seq)  # X is the sequences
         y.append(target)  # y is the targets/labels
 
