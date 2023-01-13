@@ -169,11 +169,10 @@ def get_rpp(val_df, seq, asset_name, model):
         values = val_df.iloc[t-seq:t,].copy()
         values = format_to_input(values)
         values = values.values.reshape(1,seq-1,len(val_df.columns))
-        pred = model.predict(values)[-1] #predict t+1 and retrive last prediction
-
+        pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
+        print(pred)
         df_last = pd.DataFrame([(r, pred[0], pred[1])], columns=('r', 'pred[0]', 'pred[1]'))
         df_rpp = pd.concat([df_rpp, df_last])
-        print(t)
 
     df_rpp = df_rpp.reset_index(drop=True)
     return df_rpp
@@ -210,7 +209,7 @@ def get_statistics_trading(df_rpp, treshhold):
     for t in range(0, len(df_rpp)):
         pred = df_rpp.loc[t,'pred[0]']
         r = df_rpp.loc[t,'r']
-        if pred < treshhold:
+        if pred <= treshhold:
             if r >= 0:
                 tp +=1
             if r < 0:
