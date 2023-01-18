@@ -1,94 +1,90 @@
 import pandas as pd
-import numpy as np
-import math
-import tensorflow as tf
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
 
-def credit_data_reader():
-    df = pd.read_csv('data/shb_data/terminspriser_shb.csv', delimiter=';')
-    df = df[:-1]
-    df = df[['DATE', 'RX1 Comdty', 'TY1 Comdty', 'IK1 Comdty', 'OE1 Comdty', 'DU1 Comdty']]
-    df = df.stack().str.replace(',', '.').unstack()
-    df = df.astype(
-        {
-            'RX1 Comdty': 'float',
-            'TY1 Comdty': 'float',
-            'IK1 Comdty': 'float',
-            'OE1 Comdty': 'float',
-            'DU1 Comdty': 'float'
-        }
-    )
-    rx1 = df[['RX1 Comdty']]
-    rx1 = rx1[rx1['RX1 Comdty'].notna()]
-    ty1 = df[['TY1 Comdty']]
-    ty1 = ty1[ty1['TY1 Comdty'].notna()]
-    ik1 = df[['IK1 Comdty']]
-    ik1 = ik1[ik1['IK1 Comdty'].notna()]
-    oe1 = df[['OE1 Comdty']]
-    oe1 = oe1[oe1['OE1 Comdty'].notna()]
-    du1 = df[['DU1 Comdty']]
-    du1 = du1[du1['DU1 Comdty'].notna()]
-    return rx1, ty1, ik1, oe1, du1
+import seaborn as sns
+sns.set_theme()
+sns.set_style("whitegrid", {'grid.linestyle': '--'})
+seq_col_brew = sns.color_palette("flag_r", 4)
+sns.set_palette(seq_col_brew)
+plt.rcParams["figure.figsize"] = (8,5)
+plt.rcParams["axes.titlesize"] = 17
+plt.rcParams['savefig.dpi'] = 1200
 
-# convert an array of values into a dataset matrix
-def create_dataset(dataset, look_back):
-   x_data, y_data = [], []
-   for i in range(look_back, len(dataset)-1):
-      a = dataset[i-look_back:i, 0]
-      x_data.append(a)
-      b = dataset[i:i+1, 0]
-      y_data.append(b)
-   return np.array(x_data), np.array(y_data)
+def classify(current, future):
+    if float(future) > float(current):
+        return 1
+    else:
+        return 0
 
-# convert an array of values into a dataset matrix (with binary labels)
-def create_dataset_binarylabel(dataset, look_back):
-   x_data, y_data = [], []
-   for i in range(look_back, len(dataset)-1):
-      a = dataset[i-look_back:i, 0]
-      x_data.append(a)
-      b = dataset[i:i+1, 0]
-      if(b > 0):
-        y_data.append(1)
-      else:
-        y_data.append(0)
-   return np.array(x_data), np.array(y_data)
+def plot_history_data(history):
+    # summarize history for accuracy
+    fig1, axs1 = plt.subplots(1,1)
+    fig1 = plt.plot(history['accuracy'])
+    fig1 = plt.plot(history['val_accuracy'])
+    axs1 = plt.title('Model Accuracy', )
+    axs1 = plt.ylabel('Accuracy')
+    axs1 = plt.xlabel('Epochs')
+    axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
 
-# Special activation function
-def modified_sigmoid(x):
-    return 2 * (1 / (1 + tf.math.exp(x))) - 1
+    # summarize history for loss
+    fig2, axs2 = plt.subplots(1,1)
+    fig1 = plt.plot(history['loss'])
+    fig1 = plt.plot(history['val_loss'])
+    axs1 = plt.title('Model Loss')
+    axs1 = plt.ylabel('Loss')
+    axs1 = plt.xlabel('Epochs')
+    axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
+    return fig1, axs1, fig2, axs2
 
-# Load airline data and calc returns 
-def fetch_airline_returns():
-    df = pd.read_csv('data/airline-passengers.csv', usecols=[1], engine='python')
-    df_returns = df.pct_change()[1:]
-    returns = df_returns.to_numpy()
-    returns = returns.astype('float32')# more suitable for NNs
-    return returns
-
-# split into train and test sets
-def split_into_tvt(dataset):
-    train_size = int(len(dataset) * 0.6)
-    val_size = int(len(dataset) * 0.2)
-    test_size = len(dataset) - (train_size+val_size)
-    train, val, test = dataset[0:train_size,:], dataset[train_size:train_size+val_size,:], dataset[train_size+val_size:len(dataset),:]
-    return train, val, test
-
-def get_returns(df):
-    df = df.pct_change()[1:]
-    df = df.to_numpy()
-    df = df.astype('float32')
+# Helper method
+def format_to_input(df):
+    for col in df.columns:
+        df[col] = df[col].pct_change() 
+        df[col] = preprocessing.scale(df[col].values)
+    df.dropna(inplace=True)  
     return df
 
-def credit_data_reader_returns():
-    rx1, ty1, ik1, oe1, du1 = credit_data_reader()
-    rx1 = get_returns(rx1)
-    ty1 = get_returns(ty1)
-    ik1 = get_returns(ik1)
-    oe1 = get_returns(oe1)
-    du1 = get_returns(du1)
-    return rx1, ty1, ik1, oe1, du1
+# Helper method
+def percentage_change(t,t1):
+    return (t1-t)/t
 
+def getReturnAndPreds_softmaxModel(val_df, seq, asset_name, model):
+    df_rpp = pd.DataFrame(columns=('r', 'pred[0]', 'pred[1]'))
 
+    for t in range(seq, len(val_df)-1):
+        value_t = val_df.iloc[t][asset_name]
+        value_t1 = val_df.iloc[t+1][asset_name]
+        r = percentage_change(value_t,value_t1)
 
+        values = val_df.iloc[t-seq:t,].copy()
+        values = format_to_input(values)
+        values = values.values.reshape(1,seq-1,len(val_df.columns))
+        pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
+        print(pred)
+        df_last = pd.DataFrame([(r, pred[0], pred[1])], columns=('r', 'pred[0]', 'pred[1]'))
+        df_rpp = pd.concat([df_rpp, df_last])
 
+    df_rpp = df_rpp.reset_index(drop=True)
+    return df_rpp
+
+def getReturnAndPred_sigmoidModel(val_df, seq, asset_name, model):
+    df_rp = pd.DataFrame(columns=('r', 'pred[0]'))
+
+    for t in range(seq, len(val_df)-1):
+        value_t = val_df.iloc[t][asset_name]
+        value_t1 = val_df.iloc[t+1][asset_name]
+        r = percentage_change(value_t,value_t1)
+
+        values = val_df.iloc[t-seq:t,].copy()
+        values = format_to_input(values)
+        values = values.values.reshape(1,seq-1,len(val_df.columns))
+        pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
+        print(pred)
+        df_last = pd.DataFrame([(r, pred[0])], columns=('r', 'pred[0]'))
+        df_rp = pd.concat([df_rp, df_last])
+
+    df_rp = df_rp.reset_index(drop=True)
+    return df_rp
 
 
