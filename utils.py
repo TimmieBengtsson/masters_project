@@ -11,11 +11,13 @@ plt.rcParams["figure.figsize"] = (8,5)
 plt.rcParams["axes.titlesize"] = 17
 plt.rcParams['savefig.dpi'] = 1200
 
+
 def classify(current, future):
     if float(future) > float(current):
         return 1
     else:
         return 0
+
 
 def plot_history_data(history):
     # summarize history for accuracy
@@ -37,6 +39,7 @@ def plot_history_data(history):
     axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
     return fig1, axs1, fig2, axs2
 
+
 # Helper method
 def format_to_input(df):
     for col in df.columns:
@@ -45,12 +48,14 @@ def format_to_input(df):
     df.dropna(inplace=True)  
     return df
 
+
 # Helper method
 def percentage_change(t,t1):
     return (t1-t)/t
 
+
 def getReturnAndPreds_softmaxModel(val_df, seq, asset_name, model):
-    df_rpp = pd.DataFrame(columns=('r', 'pred[0]', 'pred[1]'))
+    df_rpp = pd.DataFrame(columns=('r', 'probability_up', 'probability_down'))
 
     for t in range(seq, len(val_df)-1):
         value_t = val_df.iloc[t][asset_name]
@@ -62,14 +67,15 @@ def getReturnAndPreds_softmaxModel(val_df, seq, asset_name, model):
         values = values.values.reshape(1,seq-1,len(val_df.columns))
         pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
         print(pred)
-        df_last = pd.DataFrame([(r, pred[0], pred[1])], columns=('r', 'pred[0]', 'pred[1]'))
+        df_last = pd.DataFrame([(r, pred[0], pred[1])], columns=('r', 'probability_up', 'probability_down'))
         df_rpp = pd.concat([df_rpp, df_last])
 
     df_rpp = df_rpp.reset_index(drop=True)
     return df_rpp
 
+
 def getReturnAndPred_sigmoidModel(val_df, seq, asset_name, model):
-    df_rp = pd.DataFrame(columns=('r', 'pred[0]'))
+    df_rp = pd.DataFrame(columns=('r', 'probability_up'))
 
     for t in range(seq, len(val_df)-1):
         value_t = val_df.iloc[t][asset_name]
@@ -81,7 +87,7 @@ def getReturnAndPred_sigmoidModel(val_df, seq, asset_name, model):
         values = values.values.reshape(1,seq-1,len(val_df.columns))
         pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
         print(pred)
-        df_last = pd.DataFrame([(r, pred[0])], columns=('r', 'pred[0]'))
+        df_last = pd.DataFrame([(r, pred[0])], columns=('r', 'probability_up'))
         df_rp = pd.concat([df_rp, df_last])
 
     df_rp = df_rp.reset_index(drop=True)

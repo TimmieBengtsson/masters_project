@@ -6,9 +6,9 @@ def portfolio_value_trading(df_rpp, treshhold):
     cash = 100
     for t in range(0, len(df_rpp)):
         portfolio_value[t] = cash
-        pred = df_rpp.loc[t,'pred[0]']
+        pred = df_rpp.loc[t, 'probability_up']
         r = df_rpp.loc[t,'r']
-        if pred < treshhold:
+        if pred >= treshhold:
             cash = cash * (1+r)
         else:
             cash = cash * (1-r)
@@ -25,17 +25,34 @@ def portfolio_value_hold(df_rpp):
     return portfolio_value
 
 
+def portfolio_value_naive(df_rpp):
+    portfolio_value = np.zeros(len(df_rpp))
+    cash = 100
+    for t in range(0, len(df_rpp)):
+        portfolio_value[t] = cash
+        if t == 0:
+            continue
+
+        r_previous = df_rpp.loc[t-1,'r']
+        r = df_rpp.loc[t,'r']
+        if r_previous >= 0:
+            cash = cash * (1+r)
+        else:
+            cash = cash * (1-r)
+    return portfolio_value
+
+
 def confusion_stats_trading(df_rpp, treshhold):
     tp, fp, tn, fn = 0, 0, 0, 0
     for t in range(0, len(df_rpp)):
-        pred = df_rpp.loc[t,'pred[0]']
+        pred = df_rpp.loc[t, 'probability_up']
         r = df_rpp.loc[t,'r']
-        if pred <= treshhold:
+        if pred >= treshhold:
             if r >= 0:
                 tp +=1
             if r < 0:
                 fp +=1
-        if pred > treshhold:
+        if pred < treshhold:
             if r >= 0:
                 fn +=1
             if r < 0:

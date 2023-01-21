@@ -34,7 +34,7 @@ def lstm_sigmoid(train_x):
         metrics=['accuracy'])
     return model
 
-
+#need to fix the labeling data to [0,1], [1,0] etc instead to use this. 
 def lstm_softmax(train_x):
     model = Sequential()
     model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
