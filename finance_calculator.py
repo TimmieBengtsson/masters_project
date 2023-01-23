@@ -1,4 +1,5 @@
 import numpy as np
+import math 
 
 
 def portfolio_value_neural(df_rpp, treshhold):
@@ -66,10 +67,14 @@ def confusion_stats_printer(tp, fp, tn, fn):
     specificity = tn / (tn + fp) #TN / N
     precision = tp / (tp + fp)
     neg_precision = tn / (tn + fn)
-    print("True positive rate: {:5.2f}%".format(100 * recall))
-    print("True negative rate: {:5.2f}%".format(100 * specificity))
-    print("Positive predictive value: {:5.2f}%".format(100 * precision))
-    print("Negative predictive value: {:5.2f}%".format(100 * neg_precision))
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    print("Accuracy: {:5.2f}%".format(100 * accuracy))
+    print('')
+    print("TPR: {:5.2f}%".format(100 * recall))
+    print("TNR: {:5.2f}%".format(100 * specificity))
+    print("PPV: {:5.2f}%".format(100 * precision))
+    print("NPV: {:5.2f}%".format(100 * neg_precision))
+    print('')
 
 
 def confusion_stats_trend(df_rpp, nbr_previous_days):
@@ -146,20 +151,27 @@ def sharpe_ratio(returns, trading_days_year, rf):
     return mean / sigma
 
 
+def sharpe_ratio2(portfolio_values, rf):
+    total_real_return = gross_return(portfolio_values) -rf
+    nbr_of_years_held_investment = len(portfolio_values)/252
+    total_real_return_annualized = pow(1 + total_real_return, 1/nbr_of_years_held_investment) -1
+    portfolio_volatility_yearly = portfolio_yearly_standard_deviation(portfolio_values)
+    return total_real_return_annualized / portfolio_volatility_yearly
+
+
 def sortino_ratio(returns, trading_days_year, rf):
     mean = (returns.mean() * trading_days_year) -rf
     std_neg = returns[returns<0].std() * np.sqrt(trading_days_year)
     return mean / std_neg
 
 
-def max_drawdown(returns):
-    comp_ret = (returns+1).cumprod()
-    peak = comp_ret.expanding(min_periods=1).max()
-    dd = (comp_ret/peak)-1
-    return dd.min()
+def maximal_drawdown(portfolio_value):
+    running_max = np.maximum.accumulate(portfolio_value)
+    drawdown = (running_max - portfolio_value) / running_max
+    return np.max(drawdown) *-1
 
 
-def daily_returns(prices):
+def returns(prices):
     returns = []
     for i in range(1, len(prices)):
         daily_return = (prices[i] - prices[i-1]) / prices[i-1]
@@ -169,3 +181,11 @@ def daily_returns(prices):
 
 def gross_return(pv):
     return (pv[-1]-pv[0]) / pv[0]
+
+
+def portfolio_yearly_standard_deviation(portfolio_values):
+    every_fifth_value = portfolio_values[0::5]
+    weekly_returns = returns(every_fifth_value)
+    yearly_variance = weekly_returns.var() * 52
+    yearly_standard_deviation = np.sqrt(yearly_variance)
+    return yearly_standard_deviation
