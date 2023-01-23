@@ -1,16 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
-
 import seaborn as sns
-sns.set_theme()
-sns.set_style("whitegrid", {'grid.linestyle': '--'})
-seq_col_brew = sns.color_palette("flag_r", 4)
-sns.set_palette(seq_col_brew)
-plt.rcParams["figure.figsize"] = (8,5)
-plt.rcParams["axes.titlesize"] = 17
-plt.rcParams['savefig.dpi'] = 1200
-
 
 def classify(current, future):
     if float(future) > float(current):
@@ -22,8 +13,8 @@ def classify(current, future):
 def plot_history_data(history):
     # summarize history for accuracy
     fig1, axs1 = plt.subplots(1,1)
-    fig1 = plt.plot(history['accuracy'])
-    fig1 = plt.plot(history['val_accuracy'])
+    fig1 = plt.plot(history['accuracy'],  color='firebrick', linestyle='-')
+    fig1 = plt.plot(history['val_accuracy'],  color='darkblue', linestyle='-')
     axs1 = plt.title('Model Accuracy', )
     axs1 = plt.ylabel('Accuracy')
     axs1 = plt.xlabel('Epochs')
@@ -31,13 +22,35 @@ def plot_history_data(history):
 
     # summarize history for loss
     fig2, axs2 = plt.subplots(1,1)
-    fig1 = plt.plot(history['loss'])
-    fig1 = plt.plot(history['val_loss'])
+    fig1 = plt.plot(history['loss'],  color='firebrick', linestyle='-')
+    fig1 = plt.plot(history['val_loss'],  color='darkblue', linestyle='-')
     axs1 = plt.title('Model Loss')
     axs1 = plt.ylabel('Loss')
     axs1 = plt.xlabel('Epochs')
     axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
     return fig1, axs1, fig2, axs2
+
+def plot_history_data_accuracy(history):
+    # summarize history for accuracy
+    fig1, axs1 = plt.subplots(1,1)
+    fig1 = plt.plot(history['accuracy'],  color='firebrick', linestyle='-', linewidth='1')
+    fig1 = plt.plot(history['val_accuracy'],  color='darkblue', linestyle='-', linewidth='1')
+    axs1 = plt.title('Model Accuracy', )
+    axs1 = plt.ylabel('Accuracy')
+    axs1 = plt.xlabel('Epochs')
+    axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
+    return fig1, axs1
+
+def plot_history_data_loss(history):
+    # summarize history for loss
+    fig1, axs1 = plt.subplots(1,1)
+    fig1 = plt.plot(history['loss'],  color='firebrick', linestyle='-', linewidth='1')
+    fig1 = plt.plot(history['val_loss'],  color='darkblue', linestyle='-', linewidth='1')
+    axs1 = plt.title('Model Loss')
+    axs1 = plt.ylabel('Loss')
+    axs1 = plt.xlabel('Epochs')
+    axs1 = plt.legend(['Train', 'Validation'], loc='upper left')
+    return fig1, axs1
 
 
 # Helper method
