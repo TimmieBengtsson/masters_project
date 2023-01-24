@@ -99,7 +99,8 @@ def getReturnAndPred_sigmoidModel(val_df, seq, asset_name, model):
         values = format_to_input(values)
         values = values.values.reshape(1,seq-1,len(val_df.columns))
         pred = model.predict_on_batch(values)[-1] #predict t+1 and retrive last prediction
-        print(pred)
+        if t % 25 == 0:
+            print(pred)
         df_last = pd.DataFrame([(r, pred[0])], columns=('r', 'probability_up'))
         df_rp = pd.concat([df_rp, df_last])
 
