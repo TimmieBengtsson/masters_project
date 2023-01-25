@@ -1,6 +1,7 @@
 import pandas as pd
 
-
+# load crypto data by using below commando.
+# crypto_df = data_reader.crypto(["BTC-USD", "LTC-USD", "BCH-USD", "ETH-USD"])  
 def crypto(ratios):
     df_return = pd.DataFrame()
     for ratio in ratios: 
@@ -45,3 +46,39 @@ def credit():
     du1 = df[['DU1 Comdty']]
     du1 = du1[du1['DU1 Comdty'].notna()]
     return rx1, ty1, ik1, oe1, du1
+
+def credit_selector(asset_name):
+    df = pd.read_csv('data/shb_data/terminspriser_shb.csv', delimiter=';')
+    df = df[:-1]
+    df = df[
+        ['DATE', 
+        'RX1 Comdty', 
+        'TY1 Comdty', 
+        'IK1 Comdty', 
+        'OE1 Comdty', 
+        'DU1 Comdty'
+        ]
+    ]
+    df = df.rename(
+        columns={
+            'RX1 Comdty': 'rx1', 
+            'TY1 Comdty': 'ty1',
+            'IK1 Comdty': 'ik1',
+            'OE1 Comdty': 'oe1', 
+            'DU1 Comdty': 'du1'
+            }
+    )
+    df = df.stack().str.replace(',', '.').unstack()
+    df = df.astype(
+        {
+            'rx1': 'float',
+            'ty1': 'float',
+            'ik1': 'float',
+            'oe1': 'float',
+            'du1': 'float'
+        }
+    )
+    selected_asset = df[[asset_name]]
+    selected_asset = selected_asset[selected_asset[asset_name].notna()]
+    return selected_asset
+

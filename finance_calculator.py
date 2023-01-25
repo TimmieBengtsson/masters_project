@@ -189,3 +189,19 @@ def portfolio_yearly_standard_deviation(portfolio_values):
     yearly_variance = weekly_returns.var() * 52
     yearly_standard_deviation = np.sqrt(yearly_variance)
     return yearly_standard_deviation
+
+
+def portfolio_financial_stats(portfolio_value, one_year_of_returns):
+    RISK_FREE_RATE = 0.02
+    portfolio_returns = returns(portfolio_value)
+    sharpe = sharpe_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    print("Sharpe-ratio: {:5.2f}".format(sharpe))
+    print("Sortino-ratio: {:5.2f}".format(sortino))
+    portfolio_gross_return = gross_return(portfolio_value)
+    print("Gross return: {:5.2f}%".format(100 * portfolio_gross_return))
+    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
+    print("Maximal Drawdown: {:5.2f}%".format(100 * portfolio_maximal_drawdown))
+
+
+
