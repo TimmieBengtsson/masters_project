@@ -111,19 +111,6 @@ def model_loader(model_name=None):
     return model_name
 
 
-def history_load_plot_save(model_name):
-    history_load = np.load(f'history/{model_name}.npy',allow_pickle='TRUE').item()
-    fig1, axs1 = plot_history_data_accuracy(history_load)
-    plt.tick_params(axis='both', which='major', labelsize=15)
-    save_loc = f'plots/{model_name}_model_accuracy.eps'
-    plt.savefig(save_loc, dpi=1200, bbox_inches = "tight")
-    #2
-    fig2, axs2 = plot_history_data_loss(history_load)
-    plt.tick_params(axis='both', which='major', labelsize=15)
-    save_loc = f'plots/{model_name}_model_loss.eps'
-    plt.savefig(save_loc, dpi=1200, bbox_inches = "tight")
-
-
 def set_last_model_name(NAME):
     with open('models/last_run_model_name.txt', 'w') as f:
         f.write(NAME)
