@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import numpy as np
 import finance_calculator
+import csv
+import os
 
 def classify(current, future):
     if float(future) > float(current):
@@ -117,4 +119,18 @@ def set_last_model_name(NAME):
         print(f'Last model name is set to: {NAME}')
 
 
+def variable_save(key, value):
+    dict_var = {}
+    file_path = os.path.join(os.getcwd(), "variables.dat")
+    try:
+        with open(file_path, newline="") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                dict_var[row[0]] = row[1]
+    except FileNotFoundError:
+        pass
+    dict_var[key] = value
+    with open(file_path, "w") as f:
+        for key in dict_var.keys():
+            f.write(f"{key},{dict_var[key]}\n")
 
