@@ -1,5 +1,6 @@
 import numpy as np
-import math 
+import math
+import utils
 
 
 def portfolio_value_neural(df_rpp, treshhold):
@@ -202,6 +203,12 @@ def portfolio_financial_stats(portfolio_value, one_year_of_returns):
     print("Gross return: {:5.2f}%".format(100 * portfolio_gross_return))
     portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
     print("Maximal Drawdown: {:5.2f}%".format(100 * portfolio_maximal_drawdown))
+    save_fin_stats_variables(sharpe, sortino, portfolio_gross_return, portfolio_maximal_drawdown)
+    
 
-
-
+def save_fin_stats_variables(sharpe, sortino, gross_return, maximal_drawdown):
+    NAME = utils.model_loader_evaluate_name()
+    utils.variable_save(f'{NAME}_sharpe-ratio', sharpe)
+    utils.variable_save(f'{NAME}_sortino-ratio', sortino)
+    utils.variable_save(f'{NAME}_gross-return', gross_return)
+    utils.variable_save(f'{NAME}_maximal-drawdown', maximal_drawdown)

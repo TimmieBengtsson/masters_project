@@ -104,19 +104,32 @@ def getReturnAndPred_sigmoidModel(val_df, seq, asset_name, model):
     return df_rp
 
 
-def model_loader(model_name=None):
-    if model_name is None:
-        with open('models/last_run_model_name.txt') as f:
-            last_model_name = f.readline()
-            print(f'Model name from latest run was loaded.\nLast model name: {last_model_name}')
-            return last_model_name
-    return model_name
+def model_loader_train_name(NAME=None):
+    if NAME is None:
+        with open('models/last_trained_model_name.txt') as f:
+            NAME = f.readline()
+            print(f'Model name from latest training was loaded.\nLast trained model name: {NAME}')
+            return NAME
+    return NAME
+
+def model_loader_evaluate_name(NAME=None):
+    if NAME is None:
+        with open('models/last_evaluated_model_name.txt') as f:
+            NAME = f.readline()
+            print(f'Model name from latest evaluation was loaded.\nLast evaluated model name: {NAME}')
+            return NAME
+    return NAME
 
 
-def set_last_model_name(NAME):
-    with open('models/last_run_model_name.txt', 'w') as f:
+def set_last_trained_model_name(NAME):
+    with open('models/last_trained_model_name.txt', 'w') as f:
         f.write(NAME)
-        print(f'Last model name is set to: {NAME}')
+        print(f'Last trained model name is set to: {NAME}')
+
+def set_last_evaluated_model_name(NAME):
+    with open('models/last_evaluated_model_name.txt', 'w') as f:
+        f.write(NAME)
+        print(f'Last evaluated model name is set to: {NAME}')
 
 
 def variable_save(key, value):
