@@ -63,14 +63,16 @@ def portfolio_value_trend(df_rpp, nbr_previous_days):
 
 
 def confusion_stats_printer(tp, fp, tn, fn):
-    print(f'TP: {tp}'); print(f'FP: {fp}'); print(f'TN: {tn}'); print(f'FN: {fn}')
+    print(f'TP: {tp}') 
+    print(f'FP: {fp}') 
+    print(f'TN: {tn}') 
+    print(f'FN: {fn}')
     recall = tp / (tp + fn) #TP / P
     specificity = tn / (tn + fp) #TN / N
     precision = tp / (tp + fp)
     neg_precision = tn / (tn + fn)
     accuracy = (tp + tn) / (tp + tn + fp + fn)
     print("Accuracy: {:5.2f}%".format(100 * accuracy))
-    print('')
     print("TPR: {:5.2f}%".format(100 * recall))
     print("TNR: {:5.2f}%".format(100 * specificity))
     print("PPV: {:5.2f}%".format(100 * precision))
@@ -144,6 +146,24 @@ def confusion_stats_neural(df_rpp, treshhold):
     print('')
     print('NEURAL STATS:')
     confusion_stats_printer(tp, fp, tn, fn)
+    confusion_stats_save_variable('neural', tp, fp, tn, fn)
+
+def confusion_stats_save_variable(model_type, tp, fp, tn, fn):
+    NAME = utils.model_loader_evaluate_name()
+    utils.variable_save(f'{NAME}-{model_type}_tp', tp)
+    utils.variable_save(f'{NAME}-{model_type}_fp', fp)
+    utils.variable_save(f'{NAME}-{model_type}_tn', tn)
+    utils.variable_save(f'{NAME}-{model_type}_fn', fn)
+    recall = tp / (tp + fn) #TP / P
+    specificity = tn / (tn + fp) #TN / N
+    precision = tp / (tp + fp)
+    neg_precision = tn / (tn + fn)
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    utils.variable_save(f'{NAME}-{model_type}_accuracy', 100*accuracy)
+    utils.variable_save(f'{NAME}-{model_type}_recall', 100*recall)
+    utils.variable_save(f'{NAME}-{model_type}_specificity', 100*specificity)
+    utils.variable_save(f'{NAME}-{model_type}_precision', 100*precision)
+    utils.variable_save(f'{NAME}-{model_type}_neg_precision', 100*neg_precision)
 
 
 def sharpe_ratio(returns, trading_days_year, rf):
@@ -192,23 +212,32 @@ def portfolio_yearly_standard_deviation(portfolio_values):
     return yearly_standard_deviation
 
 
-def portfolio_financial_stats(portfolio_value, one_year_of_returns):
+def portfolio_financial_stats_print(portfolio_value, one_year_of_returns):
     RISK_FREE_RATE = 0.02
     portfolio_returns = returns(portfolio_value)
     sharpe = sharpe_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
     sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    portfolio_gross_return = gross_return(portfolio_value)
+    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
     print("Sharpe-ratio: {:5.2f}".format(sharpe))
     print("Sortino-ratio: {:5.2f}".format(sortino))
-    portfolio_gross_return = gross_return(portfolio_value)
     print("Gross return: {:5.2f}%".format(100 * portfolio_gross_return))
-    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
     print("Maximal Drawdown: {:5.2f}%".format(100 * portfolio_maximal_drawdown))
-    save_fin_stats_variables(sharpe, sortino, portfolio_gross_return, portfolio_maximal_drawdown)
+
+
+def portfolio_financial_stats_save_variable(model_type, portfolio_value, one_year_of_returns):
+    RISK_FREE_RATE = 0.02
+    portfolio_returns = returns(portfolio_value)
+    sharpe = sharpe_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    portfolio_gross_return = gross_return(portfolio_value)
+    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
+    save_fin_stats_variables(model_type, sharpe, sortino, portfolio_gross_return, portfolio_maximal_drawdown)
     
 
-def save_fin_stats_variables(sharpe, sortino, gross_return, maximal_drawdown):
+def save_fin_stats_variables(model_type, sharpe, sortino, gross_return, maximal_drawdown):
     NAME = utils.model_loader_evaluate_name()
-    utils.variable_save(f'{NAME}_sharpe-ratio', sharpe)
-    utils.variable_save(f'{NAME}_sortino-ratio', sortino)
-    utils.variable_save(f'{NAME}_gross-return', gross_return)
-    utils.variable_save(f'{NAME}_maximal-drawdown', maximal_drawdown)
+    utils.variable_save(f'{NAME}-{model_type}_sharpe-ratio', sharpe)
+    utils.variable_save(f'{NAME}-{model_type}_sortino-ratio', sortino)
+    utils.variable_save(f'{NAME}-{model_type}_gross-return', 100*gross_return)
+    utils.variable_save(f'{NAME}-{model_type}_maximal-drawdown', 100*maximal_drawdown)
