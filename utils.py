@@ -134,3 +134,4 @@ def variable_save(key, value):
         for key in dict_var.keys():
             f.write(f"{key},{dict_var[key]}\n")
 
+
