@@ -160,10 +160,10 @@ def confusion_stats_save_variable(model_type, tp, fp, tn, fn):
     neg_precision = tn / (tn + fn)
     accuracy = (tp + tn) / (tp + tn + fp + fn)
     utils.variable_save(f'{NAME}-{model_type}_accuracy', 100*accuracy)
-    utils.variable_save(f'{NAME}-{model_type}_recall', 100*recall)
-    utils.variable_save(f'{NAME}-{model_type}_specificity', 100*specificity)
-    utils.variable_save(f'{NAME}-{model_type}_precision', 100*precision)
-    utils.variable_save(f'{NAME}-{model_type}_neg_precision', 100*neg_precision)
+    utils.variable_save(f'{NAME}-{model_type}_tpr', 100*recall)
+    utils.variable_save(f'{NAME}-{model_type}_tnr', 100*specificity)
+    utils.variable_save(f'{NAME}-{model_type}_ppv', 100*precision)
+    utils.variable_save(f'{NAME}-{model_type}_npv', 100*neg_precision)
 
 
 def sharpe_ratio(returns, trading_days_year, rf):
@@ -172,12 +172,19 @@ def sharpe_ratio(returns, trading_days_year, rf):
     return mean / sigma
 
 
-def sharpe_ratio2(portfolio_values, rf):
+def sharpe_ratio_custom(portfolio_values, one_year_of_returns, rf):
     total_real_return = gross_return(portfolio_values) -rf
     nbr_of_years_held_investment = len(portfolio_values)/252
     total_real_return_annualized = pow(1 + total_real_return, 1/nbr_of_years_held_investment) -1
     portfolio_volatility_yearly = portfolio_yearly_standard_deviation(portfolio_values)
     return total_real_return_annualized / portfolio_volatility_yearly
+
+def portfolio_yearly_standard_deviation(portfolio_values):
+    every_fifth_value = portfolio_values[0::5]
+    weekly_returns = returns(every_fifth_value)
+    yearly_variance = weekly_returns.var() * 52
+    yearly_standard_deviation = np.sqrt(yearly_variance)
+    return yearly_standard_deviation
 
 
 def sortino_ratio(returns, trading_days_year, rf):
@@ -204,18 +211,10 @@ def gross_return(pv):
     return (pv[-1]-pv[0]) / pv[0]
 
 
-def portfolio_yearly_standard_deviation(portfolio_values):
-    every_fifth_value = portfolio_values[0::5]
-    weekly_returns = returns(every_fifth_value)
-    yearly_variance = weekly_returns.var() * 52
-    yearly_standard_deviation = np.sqrt(yearly_variance)
-    return yearly_standard_deviation
-
-
 def portfolio_financial_stats_print(portfolio_value, one_year_of_returns):
-    RISK_FREE_RATE = 0.02
+    RISK_FREE_RATE = 0.00
     portfolio_returns = returns(portfolio_value)
-    sharpe = sharpe_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    sharpe = sharpe_ratio_custom(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
     sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
     portfolio_gross_return = gross_return(portfolio_value)
     portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
@@ -226,9 +225,9 @@ def portfolio_financial_stats_print(portfolio_value, one_year_of_returns):
 
 
 def portfolio_financial_stats_save_variable(model_type, portfolio_value, one_year_of_returns):
-    RISK_FREE_RATE = 0.02
+    RISK_FREE_RATE = 0.00
     portfolio_returns = returns(portfolio_value)
-    sharpe = sharpe_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    sharpe = sharpe_ratio_custom(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
     sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
     portfolio_gross_return = gross_return(portfolio_value)
     portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
