@@ -2,12 +2,8 @@
 .ipynb_checkpoints
 .DS_Store
 __pycache__
-.pyc
+.pec
 graveyard.py
-models
-msc_plots
 .idea
-old_cryptopred.ipynb
-old_pricepred.ipynb
 trail.ipynb
 obsolete_utils_ignore.py

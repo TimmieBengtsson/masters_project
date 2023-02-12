@@ -3,35 +3,35 @@ import math
 import utils
 
 
-def portfolio_value_neural(df_rpp, treshhold):
-    portfolio_value = np.zeros(len(df_rpp))
+def portfolio_values_neural(df_rpp, treshhold):
+    portfolio_values = np.zeros(len(df_rpp))
     cash = 100
     for t in range(0, len(df_rpp)):
-        portfolio_value[t] = cash
+        portfolio_values[t] = cash
         pred = df_rpp.loc[t, 'probability_up']
         r = df_rpp.loc[t,'r']
         if pred >= treshhold:
             cash = cash * (1+r)
         else:
             cash = cash * (1-r)
-    return portfolio_value
+    return portfolio_values
 
 
-def portfolio_value_hold(df_rpp):
-    portfolio_value = np.zeros(len(df_rpp))
+def portfolio_values_hold(df_rpp):
+    portfolio_values = np.zeros(len(df_rpp))
     cash = 100
     for t in range(0, len(df_rpp)):
-        portfolio_value[t] = cash
+        portfolio_values[t] = cash
         r = df_rpp.loc[t,'r']
         cash = cash * (1+r)
-    return portfolio_value
+    return portfolio_values
 
 
-def portfolio_value_naive(df_rpp):
-    portfolio_value = np.zeros(len(df_rpp))
+def portfolio_values_naive(df_rpp):
+    portfolio_values = np.zeros(len(df_rpp))
     cash = 100
     for t in range(0, len(df_rpp)):
-        portfolio_value[t] = cash
+        portfolio_values[t] = cash
         if t == 0:
             continue
         r_previous = df_rpp.loc[t-1,'r']
@@ -40,13 +40,13 @@ def portfolio_value_naive(df_rpp):
             cash = cash * (1+r)
         else:
             cash = cash * (1-r)
-    return portfolio_value
+    return portfolio_values
 
-def portfolio_value_trend(df_rpp, nbr_previous_days):
-    portfolio_value = np.zeros(len(df_rpp))
+def portfolio_values_trend(df_rpp, nbr_previous_days):
+    portfolio_values = np.zeros(len(df_rpp))
     cash = 100
     for t in range(0, len(df_rpp)):
-        portfolio_value[t] = cash
+        portfolio_values[t] = cash
         if t < nbr_previous_days:
             continue
         sum_previous_days = 0
@@ -59,7 +59,7 @@ def portfolio_value_trend(df_rpp, nbr_previous_days):
             cash = cash * (1+r)
         else:
             cash = cash * (1-r)        
-    return portfolio_value
+    return portfolio_values
 
 
 def confusion_stats_printer(tp, fp, tn, fn):
@@ -193,15 +193,17 @@ def sortino_ratio(returns, trading_days_year, rf):
     return mean / std_neg
 
 
-def maximal_drawdown(portfolio_value):
-    running_max = np.maximum.accumulate(portfolio_value)
-    drawdown = (running_max - portfolio_value) / running_max
+def maximal_drawdown(portfolio_values):
+    running_max = np.maximum.accumulate(portfolio_values)
+    drawdown = (running_max - portfolio_values) / running_max
     return np.max(drawdown) *-1
 
 
 def returns(prices):
     returns = []
     for i in range(1, len(prices)):
+        if(prices[i-1]==0):
+            print(prices[i-1])
         daily_return = (prices[i] - prices[i-1]) / prices[i-1]
         returns.append(daily_return)
     return np.array(returns)
@@ -211,26 +213,26 @@ def gross_return(pv):
     return (pv[-1]-pv[0]) / pv[0]
 
 
-def portfolio_financial_stats_print(portfolio_value, one_year_of_returns):
+def portfolio_financial_stats_print(portfolio_values, one_year_of_returns):
     RISK_FREE_RATE = 0.00
-    portfolio_returns = returns(portfolio_value)
-    sharpe = sharpe_ratio_custom(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    portfolio_returns = returns(portfolio_values)
+    sharpe = sharpe_ratio_custom(portfolio_values, one_year_of_returns, RISK_FREE_RATE)
     sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
-    portfolio_gross_return = gross_return(portfolio_value)
-    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
+    portfolio_gross_return = gross_return(portfolio_values)
+    portfolio_maximal_drawdown = maximal_drawdown(portfolio_values)
     print("Sharpe-ratio: {:5.2f}".format(sharpe))
     print("Sortino-ratio: {:5.2f}".format(sortino))
     print("Gross return: {:5.2f}%".format(100 * portfolio_gross_return))
     print("Maximal Drawdown: {:5.2f}%".format(100 * portfolio_maximal_drawdown))
 
 
-def portfolio_financial_stats_save_variable(model_type, portfolio_value, one_year_of_returns):
+def portfolio_financial_stats_save_variable(model_type, portfolio_values, one_year_of_returns):
     RISK_FREE_RATE = 0.00
-    portfolio_returns = returns(portfolio_value)
-    sharpe = sharpe_ratio_custom(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
+    portfolio_returns = returns(portfolio_values)
+    sharpe = sharpe_ratio_custom(portfolio_values, one_year_of_returns, RISK_FREE_RATE)
     sortino = sortino_ratio(portfolio_returns, one_year_of_returns, RISK_FREE_RATE)
-    portfolio_gross_return = gross_return(portfolio_value)
-    portfolio_maximal_drawdown = maximal_drawdown(portfolio_value)
+    portfolio_gross_return = gross_return(portfolio_values)
+    portfolio_maximal_drawdown = maximal_drawdown(portfolio_values)
     save_fin_stats_variables(model_type, sharpe, sortino, portfolio_gross_return, portfolio_maximal_drawdown)
     
 
