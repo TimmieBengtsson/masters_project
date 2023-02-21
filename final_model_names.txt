@@ -1,0 +1,11 @@
+02.11.1942-du1-60-1-lstm-sigmoid-30-8
+02.11.1915-oe1-60-1-lstm-sigmoid-30-8
+02.11.1609-ik1-60-1-lstm-sigmoid-30-8
+02.11.1522-ty1-60-1-lstm-sigmoid-30-8
+02.11.1431-rx1-60-1-lstm-sigmoid-30-8
+
+02.08.2356-ik1-60-1-gru-sigmoid-30-8
+02.08.2310-du1-60-1-gru-sigmoid-30-8
+02.08.2245-oe1-60-1-gru-sigmoid-30-8
+02.08.2216-ty1-60-1-gru-sigmoid-30-8
+02.08.2145-rx1-60-1-gru-sigmoid-30-8

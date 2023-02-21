@@ -6,14 +6,39 @@ import utils
 def portfolio_values_neural(df_rpp, treshhold):
     portfolio_values = np.zeros(len(df_rpp))
     cash = 100
+    position = 0
+    nbr_trades = 0
+    days_long = 0
+    days_short = 0
     for t in range(0, len(df_rpp)):
         portfolio_values[t] = cash
         pred = df_rpp.loc[t, 'probability_up']
         r = df_rpp.loc[t,'r']
         if pred >= treshhold:
             cash = cash * (1+r)
+            days_long = days_long +1
+            if position < 0:
+                nbr_trades = nbr_trades +1 
+            position = 1
         else:
             cash = cash * (1-r)
+            days_short = days_short +1
+            if position > 0:
+                nbr_trades = nbr_trades +1
+            position = -1
+
+        # if last_position positive and current position negative:
+        #     nbr_trades = nbr_trades +1
+        # if last position negative and current position positive:
+        #     nbr_trades = nbr_trades +1
+    
+        if(t==len(df_rpp)-1):
+            # print('Neural #trades: ', nbr_trades)
+            # print('Neural % days long: ', np.round(days_long / (days_long+days_short),3))
+            # print('Neural % days short: ', np.round(days_short / (days_long+days_short),3))
+            print(days_long+days_short)
+            print(days_long)
+            print('')
     return portfolio_values
 
 
@@ -30,6 +55,10 @@ def portfolio_values_hold(df_rpp):
 def portfolio_values_naive(df_rpp):
     portfolio_values = np.zeros(len(df_rpp))
     cash = 100
+    position = 0
+    nbr_trades = 0
+    days_long = 0
+    days_short = 0
     for t in range(0, len(df_rpp)):
         portfolio_values[t] = cash
         if t == 0:
@@ -38,13 +67,32 @@ def portfolio_values_naive(df_rpp):
         r = df_rpp.loc[t,'r']
         if r_previous >= 0:
             cash = cash * (1+r)
+            days_long = days_long +1
+            if position < 0:
+                nbr_trades = nbr_trades +1 
+            position = 1
         else:
             cash = cash * (1-r)
+            days_short = days_short +1
+            if position > 0:
+                nbr_trades = nbr_trades +1
+            position = -1
+        if(t==len(df_rpp)-1):
+            # print('Naive #trades: ', nbr_trades)
+            # print('Naive % days long: ', np.round(days_long / (days_long+days_short),3))
+            # print('Naive % days short: ', np.round(days_short / (days_long+days_short),3))
+            print(days_long+days_short)
+            print(days_long)
+            print('')
     return portfolio_values
 
 def portfolio_values_trend(df_rpp, nbr_previous_days):
     portfolio_values = np.zeros(len(df_rpp))
     cash = 100
+    position = 0
+    nbr_trades = 0
+    days_long = 0
+    days_short = 0
     for t in range(0, len(df_rpp)):
         portfolio_values[t] = cash
         if t < nbr_previous_days:
@@ -57,8 +105,23 @@ def portfolio_values_trend(df_rpp, nbr_previous_days):
         r = df_rpp.loc[t,'r']
         if previous_days_average >= 0:
             cash = cash * (1+r)
+            days_long = days_long +1
+            if position < 0:
+                nbr_trades = nbr_trades +1 
+            position = 1
         else:
-            cash = cash * (1-r)        
+            cash = cash * (1-r)  
+            days_short = days_short +1
+            if position > 0:
+                nbr_trades = nbr_trades +1
+            position = -1     
+        if(t==len(df_rpp)-1):
+            # print('Trend #trades: ', nbr_trades) 
+            # print('Trend % days long: ', np.round(days_long / (days_long+days_short),3))
+            # print('Trend % days short: ', np.round(days_short / (days_long+days_short),3))
+            print(days_long+days_short)
+            print(days_long)
+            print('')
     return portfolio_values
 
 
